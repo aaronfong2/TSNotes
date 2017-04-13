@@ -1,0 +1,13 @@
+input.msg[type=text] {
+	width: 80%;
+	height: 100px;
+	padding: 10px;
+	margin: 10px;
+	box-sizing: border-box;
+}
+
+textarea.msg {
+	height: 400px;
+	width: 800px;
+
+}

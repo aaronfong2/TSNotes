@@ -1,0 +1,6 @@
+{
+    "dev": {
+        "app_function": "run.webapp", 
+        "s3_bucket": "ece1779-aaron-a2"
+    }
+}

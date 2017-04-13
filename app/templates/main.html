@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>Type your note here:</p>
+<form id="msg_form" action="{{url_for('encrypt')}}" method="POST">
+	<textarea class="msg" name="message" form="msg_form"></textarea>
+	<br>
+	Choose a password: <input type="password" name="password" id="password1"> 
+	<br>
+	Re-enter password: <input type="password" id="password2">
+	<br>
+	<input type="submit" value="Encrypt!">
+</form>
+<p id='pw_err' hidden style="color:red">Passwords do not match!</p>
+
+<script src="{{url_for('static',filename='jquery-3.2.1.min.js')}}"></script>
+<script>
+$(function(){
+	$('#password1,#password2').keyup(function(){
+		if ($('#password1').val() != $('#password2').val()){
+			$('#pw_err').attr('hidden',false);
+			$(':submit').attr('disabled',true);
+		}
+		else{
+			$('#pw_err').attr('hidden',true);
+			$(':submit').attr('disabled',false);
+		}
+	});
+});
+
+</script>
+
+
+{% endblock %}
