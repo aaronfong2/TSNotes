@@ -47,7 +47,8 @@ def encrypt():
             if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
                 raise
 
-    return render_template('success.html',msg_url=url_for('show',msg_id=msg_id,_external=True),title="TSNotes")
+    return render_template('success.html',msg_url=url_for('show',msg_id=msg_id,_external=True),
+            success_msg="Note successfully create. Access it at the following linke:",title="TSNotes")
 
 @webapp.route('/show/<string:msg_id>')
 def show(msg_id):
@@ -84,11 +85,29 @@ def decrypt():
     stream = AES.new(key,AES.MODE_CFB,str(msg['iv']))
     decrypted = stream.decrypt(str(msg['message']))
     decrypted_nonce = stream.decrypt(str(msg['nonce_enc']))
+    nonce_b64 = base64.urlsafe_b64encode(decrypted_nonce)
+
+
 
     if decrypted_nonce != msg['nonce']:
         return render_template("password_error.html",err_msg="Wrong password.",msg_id=msg_id,title="TSNotes")
 
-    return render_template("decrypted.html",message=decrypted,title="TSNotes")
+    return render_template("decrypted.html",message=decrypted,msg_id=msg_id,nonce_b64=nonce_b64,title="TSNotes")
+
+@webapp.route('/delete')
+def delete():
+    nonce_b64 = request.form.get('nonce_b64','')
+    nonce = base64.urlsafe_b64decode(nonce_b64)
+    msg_id = request.form.get('msg_id','')
+
+    table = dynamodb.Table('TSNotes')
+    response = table.get_item(Key={'msg_id':msg_id},ConsistentRead=True)
+    if 'Item' not in response or reponse['Item']['nonce'] != nonce:
+        return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
+
+    table.delete_item(Key={'msg_id':msg_id})
+    return render_template("success.html",success_msg="Note successfully deleted.",title="TSNotes")
+
 
 # Used to pass into PBKDF2
 def HMAC_SHA256(p,s):
@@ -97,5 +116,5 @@ def HMAC_SHA256(p,s):
 
 rng = Random.new()
 db = {}
-#dynamodb = boto3.resource('dynamodb',region_name='us-east-1',endpoint_url="http://localhost:8000")
-dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
+dynamodb = boto3.resource('dynamodb',region_name='us-east-1',endpoint_url="http://localhost:8000")
+#dynamodb = boto3.resource('dynamodb',region_name='us-east-1')

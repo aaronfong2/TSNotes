@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 
-<p>Note successfully created. Access it at the following link:</p>
+<p>{{success_message}}Note successfully created. Access it at the following link:</p>
 <br>
+{%if msg_url != None %}
 <a href="{{msg_url}}">{{msg_url}}</a>
+{%endif%}
 
 <p>
 <form action="{{url_for('main')}}">

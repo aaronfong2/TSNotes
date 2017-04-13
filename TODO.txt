@@ -1,0 +1,8 @@
+- Make sure notes timeout and get deleted from DynamoDB
+	- All notes have timeout (?<7 days)
+- Add a Captcha
+- Admin interface?...
+- Support uploading files (encrypt and save in S3)
+- Support immediate deletion
+- Client side enc/dec
+- Layout / aesthetics
