@@ -35,6 +35,8 @@ def encrypt():
 
     table = dynamodb.Table('TSNotes')
     db_item = {'salt':Binary(salt),'iv':Binary(iv),'nonce':Binary(nonce),'nonce_enc':Binary(nonce_enc),'message':Binary(msg_enc)}
+
+    # Don't overwrite existing notes
     while True:
         try:
             msg_id = base64.urlsafe_b64encode(rng.read(15))
@@ -45,46 +47,48 @@ def encrypt():
             if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
                 raise
 
-    return url_for('show',msg_id=msg_id,_external=True)
+    return render_template('success.html',msg_url=url_for('show',msg_id=msg_id,_external=True),title="TSNotes")
 
 @webapp.route('/show/<string:msg_id>')
 def show(msg_id):
     if (msg_id == ""):
-        return "Msg not found."
+        return render_template("error.html",err_msg="Note not found.",title="TSNotes")
 
     table = dynamodb.Table('TSNotes')
     response = table.get_item(Key={'msg_id':msg_id},ConsistentRead=True)
 
     if 'Item' not in response:
-        return "Msg not found."
+        return render_template("error.html",err_msg="Note not found.",title="TSNotes")
     return render_template("show.html",title="TSNotes",msg_id=msg_id)
     
 @webapp.route('/decrypt',methods=['POST'])
 def decrypt():
+    # Get message id and password from POST data
     msg_id = request.form.get('msg_id',"")
     pw = request.form.get('password',None)
     if (msg_id == ""):
-        return "Msg not found."
+        return render_template("error.html",err_msg="Note not found.",title="TSNotes")
     if pw is None:
-        return "No password given."
+        return render_template("password_error.html",err_msg="No password was given.",msg_id=msg_id,title="TSNotes")
 
+    # Look up message in DynamoDB
     table = dynamodb.Table('TSNotes')
     response = table.get_item(Key={'msg_id':msg_id},ConsistentRead=True)
 
     if 'Item' not in response:
-        return "Msg not found."
+        return render_template("error.html",err_msg="Note not found.",title="TSNotes")
 
+    # Decryption
     msg = response['Item']
-    print msg
     key = PBKDF2(pw,str(msg['salt']),count=5000,prf = HMAC_SHA256)
     stream = AES.new(key,AES.MODE_CFB,str(msg['iv']))
     decrypted = stream.decrypt(str(msg['message']))
     decrypted_nonce = stream.decrypt(str(msg['nonce_enc']))
 
     if decrypted_nonce != msg['nonce']:
-        return "Wrong password."
+        return render_template("password_error.html",err_msg="Wrong password.",msg_id=msg_id,title="TSNotes")
 
-    return decrypted
+    return render_template("decrypted.html",message=decrypted,title="TSNotes")
 
 # Used to pass into PBKDF2
 def HMAC_SHA256(p,s):

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<p>Note found</p>
+<p style="color:green">Note found in database.</p>
 <p>Please enter the password to decrypt this note.</p>
 <form id="pw_form" action="{{url_for('decrypt')}}" method="POST">
 	<input type="text" hidden value="{{msg_id}}" name="msg_id">

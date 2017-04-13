@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>The note says:</p>
+
+<div class="msg">{{message}}</div>
+
+<p>
+<form action="{{url_for('main')}}">
+	<input type="submit" value="Back to Homepage">
+</form>
+</p>
+
+
+{% endblock %}
