@@ -6,7 +6,7 @@
 <div class="msg">{{message}}</div>
 
 <p>
-<form action="{{url_for('delete')}}">
+<form action="{{url_for('delete')}}" method="POST">
 	<input type="msg_id" name="msg_id" hidden value="{{msg_id}}">
 	<input type="text" name="nonce_b64" hidden value="{{nonce_b64}}">
 	<input type="submit" value="Delete Message">

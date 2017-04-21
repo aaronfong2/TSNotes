@@ -29,9 +29,9 @@ def encrypt():
     msg_enc = stream.encrypt(message)
     nonce_enc = stream.encrypt(nonce)
 
-    print "Key =", base64.urlsafe_b64encode(key)
-    print "IV =", base64.urlsafe_b64encode(iv)
-    print "ciphertext =", base64.urlsafe_b64encode(msg_enc)
+    #print "Key =", base64.urlsafe_b64encode(key)
+    #print "IV =", base64.urlsafe_b64encode(iv)
+    #print "ciphertext =", base64.urlsafe_b64encode(msg_enc)
 
     table = dynamodb.Table('TSNotes')
     db_item = {'salt':Binary(salt),'iv':Binary(iv),'nonce':Binary(nonce),'nonce_enc':Binary(nonce_enc),'message':Binary(msg_enc)}
@@ -48,7 +48,7 @@ def encrypt():
                 raise
 
     return render_template('success.html',msg_url=url_for('show',msg_id=msg_id,_external=True),
-            success_msg="Note successfully create. Access it at the following linke:",title="TSNotes")
+            success_msg="Note successfully created. Access it at the following link:",title="TSNotes")
 
 @webapp.route('/show/<string:msg_id>')
 def show(msg_id):
@@ -94,15 +94,25 @@ def decrypt():
 
     return render_template("decrypted.html",message=decrypted,msg_id=msg_id,nonce_b64=nonce_b64,title="TSNotes")
 
-@webapp.route('/delete')
+@webapp.route('/delete',methods=['POST'])
 def delete():
     nonce_b64 = request.form.get('nonce_b64','')
-    nonce = base64.urlsafe_b64decode(nonce_b64)
     msg_id = request.form.get('msg_id','')
+    if msg_id is None or msg_id == '' or nonce_b64 is None or nonce_b64 == '':
+        return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
+
+    print msg_id
+    print nonce_b64
+    # Try to convert nonce back to byte string
+    try:
+        nonce = base64.urlsafe_b64decode(str(nonce_b64))
+    except TypeError as e:
+        raise e
+        return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
 
     table = dynamodb.Table('TSNotes')
     response = table.get_item(Key={'msg_id':msg_id},ConsistentRead=True)
-    if 'Item' not in response or reponse['Item']['nonce'] != nonce:
+    if 'Item' not in response or response['Item']['nonce'] != nonce:
         return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
 
     table.delete_item(Key={'msg_id':msg_id})
