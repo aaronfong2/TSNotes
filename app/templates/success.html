@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 
-<p>{{success_msg}}</p>
-<br>
-{%if msg_url != None %}
-<a href="{{msg_url}}">{{msg_url}}</a>
-{%endif%}
-
-<p>
-<form action="{{url_for('main')}}">
-	<input type="submit" value="Back to Homepage">
-</form>
-</p>
+<div class="container">
+	<p style="color: green">{{success_msg}}</p>
+	{%if msg_url != None %}
+	<p>
+	<a href="{{msg_url}}">{{msg_url}}</a>
+	</p>
+	{%endif%}
+</div>
+<div class="container">
+	<form action="{{url_for('main')}}">
+		<button type="submit" class="btn btn-default">Back to Homepage</button>
+	</form>
+</div>
 
 
 {% endblock %}

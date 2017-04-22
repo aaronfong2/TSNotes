@@ -1,19 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 
-<p>Type your note here:</p>
-<form id="msg_form" action="{{url_for('encrypt')}}" method="POST">
-	<textarea class="msg" name="message" form="msg_form"></textarea>
-	<br>
-	Choose a password: <input type="password" name="password" id="password1"> 
-	<br>
-	Re-enter password: <input type="password" id="password2">
-	<br>
-	<input type="submit" value="Encrypt!">
-</form>
-<p id='pw_err' hidden style="color:red">Passwords do not match!</p>
+<div class="container">
+	<form id="msg_form" action="{{url_for('encrypt')}}" method="POST">
+		<div class="form-group">
+			<label for="msg">Type your note here:</label>
+			<textarea class="form-control" rows="15" id="msg" name="message" form="msg_form"></textarea>
+		</div>
+		<div class="form-group row">
+			<div class="col-xs-3">
+				<label for="password1">Choose a password:</label>
+				<input type="password" class="form-control" name="password" id="password1"> 
+			</div>
+		</div>
+		<div class="form-group row">
+			<div class="col-xs-3">
+				<label for="password2">Re-enter password:</label>
+				<input type="password" class="form-control" id="password2">
+			</div>
+		</div>
+		<button type="submit" class="btn btn-default">Encrypt!</button>
+	</form>
+	<p id='pw_err' hidden style="color:red">Passwords do not match!</p>
+</div>
 
-<script src="{{url_for('static',filename='jquery-3.2.1.min.js')}}"></script>
+{%endblock%}
+
+{%block scripts%}
+
 <script>
 $(function(){
 	$('#password1,#password2').keyup(function(){
@@ -29,6 +43,5 @@ $(function(){
 });
 
 </script>
-
 
 {% endblock %}

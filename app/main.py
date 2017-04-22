@@ -19,6 +19,9 @@ def encrypt():
     message = request.form.get('message',"")
     pw = request.form.get('password',"")
 
+    if message == '':
+        return render_template('error.html',err_msg='Note cannot be empty.',title="TSNotes")
+
     # Crypto initialization
     salt = rng.read(16) # Salt for pbkdf2
     iv = rng.read(16) # IV for AES
@@ -98,17 +101,16 @@ def decrypt():
 def delete():
     nonce_b64 = request.form.get('nonce_b64','')
     msg_id = request.form.get('msg_id','')
-    if msg_id is None or msg_id == '' or nonce_b64 is None or nonce_b64 == '':
+    if msg_id == '':
         return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
+    if nonce_b64 == '':
+        return render_template("password_error.html",err_msg="Could not delete note.",msg_id=msg_id,title="TSNotes")
 
-    print msg_id
-    print nonce_b64
     # Try to convert nonce back to byte string
     try:
         nonce = base64.urlsafe_b64decode(str(nonce_b64))
     except TypeError as e:
-        raise e
-        return render_template("error.html",err_msg="Could not delete note.",title="TSNotes")
+        return render_template("password_error.html",err_msg="Could not delete note.",msg_id=msg_id,title="TSNotes")
 
     table = dynamodb.Table('TSNotes')
     response = table.get_item(Key={'msg_id':msg_id},ConsistentRead=True)
